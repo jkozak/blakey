@@ -1,0 +1,32 @@
+{
+  "name": "deployer",
+  "version": "0.1.0",
+  "description": "git-based systemd deployment",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "eslint -c test/eslint.conf -f compact --env node *.js",
+    "eslint:test": "eslint -c test/eslint.conf -f compact --env mocha test/*.js",
+    "pretest": "npm run eslint --silent && npm run eslint:test --silent",
+    "test:js": "cross-env NODE_ENV=test mocha -R mocha-tldr-reporter -C test/*.js",
+    "test": "npm run test:js --silent"
+  },
+  "author": "John Kozak <jk@thameslighter.net>",
+  "license": "ISC",
+  "dependencies": {
+    "argparse": "^1.0.9",
+    "verror": "^1.9.0",
+    "walk": "^2.3.9"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "cross-env": "^3.1.4",
+    "eslint": "^3.15.0",
+    "mocha": "^3.2.0",
+    "mocha-tldr-reporter": "^1.0.0",
+    "sinon": "^1.17.7",
+    "temp": "^0.8.3"
+  },
+  "bin": {
+    "deployer": "./index.js"
+  }
+}
