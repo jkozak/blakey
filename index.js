@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 
 const     cp = require('child_process');
@@ -22,24 +23,27 @@ const findLinksTo = exports.findLinksTo = (dir,target)=>{
     const links = new Set();
     if (!dir.endsWith('/'))
         dir += '/';             // for path surgery below
-    walk.walkSync(dir,{
-        listeners: {
-            names: (root,names)=>{
-                names.forEach((name)=>{
-                    const p = path.join(root,name);
-                    if (fs.lstatSync(p).isSymbolicLink()) {
-                        const q = fs.readlinkSync(p);
-                        const r = path.relative(target,q);
-                        if (!r.startsWith('..')) {
-                            const x = p.slice(dir.length);
-                            links.add(x);
+    if (!target.endsWith('/'))
+        target += '/';          // ensure X/ doesn't match X2/
+    if (fs.existsSync(dir)) {
+        walk.walkSync(dir,{
+            listeners: {
+                names: (root,names)=>{
+                    names.forEach((name)=>{
+                        const p = path.join(root,name);
+                        if (fs.lstatSync(p).isSymbolicLink()) {
+                            const q = fs.readlinkSync(p);
+                            if (q.startsWith(target)) {
+                                const x = p.slice(dir.length);
+                                links.add(x);
+                            }
                         }
-                    }
-                });
-            }
-        },
-        followLinks:false
-    });
+                    });
+                }
+            },
+            followLinks:false
+        });
+    }
     return Array.from(links).sort();
 };
 
@@ -56,13 +60,13 @@ const getAffectedServices = exports.getAffectedServices = (base,commit,opts)=>{
     const services = new Set();
 
     opts.apache2Dirs.forEach((d)=>{
-        findLinksTo(d,base).forEach(()=>services.add('apache2'));
+        findLinksTo(d,base).forEach(()=>services.add('apache2.service'));
     });
     opts.systemdDirs.forEach((d)=>{
         findLinksTo(d,base).forEach((l)=>services.add(path.basename(l)));
     });
     services.forEach((s)=>{
-        if (!opts.isServiceRunning(s))
+        if (!s.endsWith('.service') || !opts.isServiceRunning(s))
             services.delete(s);
     });
     return Array.from(services).sort();
@@ -106,6 +110,11 @@ const deploy = exports.deploy = (base,commit,opts)=>{
     const   commitDir = path.join(versionsDir,commit);
     const     workDir = path.join(commitDir,'work');
     const currentLink = path.join(base,'current');
+    const      reLink = ()=>{
+        if (fs.existsSync(currentLink))
+            fs.unlinkSync(currentLink);
+        fs.symlinkSync(path.join('versions',commit),currentLink);
+    };
     if (!fs.existsSync(versionsDir))
         fs.mkdirSync(versionsDir);
     assert(!fs.existsSync(commitDir));
@@ -124,13 +133,11 @@ const deploy = exports.deploy = (base,commit,opts)=>{
                             throw err;
                         const services = getAffectedServices(base,commit,opts);
                         if (services.length>0)
-                            systemctl(['stop','--wait'].concat(services),
+                            systemctl(['stop'].concat(services),
                                       (err1)=>{
                                           if (err1)
                                               throw err1;
-                                          if (fs.existsSync(currentLink))
-                                              fs.unlinkSync(currentLink);
-                                          fs.symlinkSync(commitDir,currentLink);
+                                          reLink();
                                           cp.execSync("sudo systemctl daemon-reload");
                                           systemctl(['start'].concat(services),
                                                     (err2)=>{
@@ -138,6 +145,8 @@ const deploy = exports.deploy = (base,commit,opts)=>{
                                                             throw err2;
                                                     } );
                                       });
+                        else
+                            reLink();
                     });
                 });
 };
@@ -219,14 +228,17 @@ const main = exports.main = (argv)=>{
         const        base = args.directory || process.cwd();
         const     repoDir = path.join(base,'repo.git');
         const    hookFile = path.join(repoDir,'hooks/post-receive');
+        const     versDir = path.join(base,'versions');
         const         bin = Object.keys(require('./package.json').bin)[0]; // !!!
         if (!fs.existsSync(repoDir)) {
             fs.mkdirSync(repoDir);
             cp.execSync(`git --git-dir=${repoDir} init --bare --shared=group`);
         }
-        fs.writeFileSync( hookFile,"#!/bin/sh");
-        fs.appendFileSync(hookFile,`${bin} post-receive-hook`);
-        fs.mkdirSync(path.join(base,'versions'));
+        fs.writeFileSync( hookFile,"#!/bin/sh\n");
+        fs.appendFileSync(hookFile,`${bin} post-receive-hook\n`);
+        fs.chmodSync(hookFile,0o774);
+        fs.mkdirSync(versDir);
+        fs.chmodSync(versDir,0o774);
     };
 
     const  args = argparse.parseArgs(argv);

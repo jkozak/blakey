@@ -8,7 +8,9 @@
     "eslint:test": "eslint -c test/eslint.conf -f compact --env mocha test/*.js",
     "pretest": "npm run eslint --silent && npm run eslint:test --silent",
     "test:js": "cross-env NODE_ENV=test mocha -R mocha-tldr-reporter -C test/*.js",
-    "test": "npm run test:js --silent"
+    "test": "npm run test:js --silent",
+    "test:XXX": "cross-env NODE_ENV=test mocha -R mocha-tldr-reporter -C test/*.js --grep XXX",
+    "test:sys": "cd test;./system-tests.sh"
   },
   "author": "John Kozak <jk@thameslighter.net>",
   "license": "ISC",
