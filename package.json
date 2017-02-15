@@ -1,6 +1,6 @@
 {
   "name": "blakey",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "simple git/systemd based deployment",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "test:js": "cross-env NODE_ENV=test mocha -R mocha-tldr-reporter -C test/*.js",
     "test": "npm run test:js --silent",
     "test:XXX": "cross-env NODE_ENV=test mocha -R mocha-tldr-reporter -C test/*.js --grep XXX",
-    "test:sys": "cd test;./system-tests.sh"
+    "test:sys": "cd test;./system-tests.sh",
+    "prepublish": "pandoc README.org -o README.md"
   },
   "author": "John Kozak <jk@thameslighter.net>",
   "license": "ISC",
@@ -30,5 +31,12 @@
   },
   "bin": {
     "blakey": "./index.js"
+  },
+  "bugs":{
+      "url": "https://github.com/jkozak/blakey/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url":  "https://github.com/jkozak/blakey.git"
   }
 }

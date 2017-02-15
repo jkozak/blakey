@@ -12,7 +12,7 @@ manages bare git repositories; if stuff is pushed to one of these
 repositories, it is automatically checked out and the services that
 reference it are restarted.  Only =systemd= is supported so far.
 
-** setup
+** Setup
 
 Until it gets published on the npm repository, install from source
 (as root) on each machine you intend to deploy to:
@@ -25,12 +25,12 @@ You should probably create a directory to keep deployments in:
 mkdir /var/local/blakey
 #+END_SRC
 
-** tests
+** Tests
 
 =npm test= runs the unit tests.  There's also some vagrant-based
 system tests: =npm run test:sys=.
 
-** use
+** Use
 
 Let's say we want to deploy a project called =butler=.
 
