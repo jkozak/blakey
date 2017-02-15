@@ -1,7 +1,7 @@
 {
-  "name": "deployer",
+  "name": "blakey",
   "version": "0.1.0",
-  "description": "git-based systemd deployment",
+  "description": "simple git/systemd based deployment",
   "main": "index.js",
   "scripts": {
     "eslint": "eslint -c test/eslint.conf -f compact --env node *.js",
@@ -29,6 +29,6 @@
     "temp": "^0.8.3"
   },
   "bin": {
-    "deployer": "./index.js"
+    "blakey": "./index.js"
   }
 }

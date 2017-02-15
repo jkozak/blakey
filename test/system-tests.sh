@@ -24,12 +24,12 @@ vagrant ssh -c "sudo bash -" <<EOF
 
 (cd ~vagrant;npm install -g)
 
-rm   -rf /var/local/deploy/test 2>/dev/null
-mkdir -p /var/local/deploy/test 2>/dev/null
-chgrp vagrant /var/local/deploy/test
-chmod g+w     /var/local/deploy/test
+rm   -rf /var/local/blakey/test 2>/dev/null
+mkdir -p /var/local/blakey/test 2>/dev/null
+chgrp vagrant /var/local/blakey/test
+chmod g+w     /var/local/blakey/test
 
-(cd /var/local/deploy/test;rm -rf *;deployer init)
+(cd /var/local/blakey/test;rm -rf *;blakey init)
 
 EOF
 
@@ -39,7 +39,7 @@ pushd $tmp
 
 git init
 
-cat >deploy-test.sh <<EOF
+cat >blakey-test.sh <<EOF
 #!/bin/bash
 while true
 do
@@ -48,9 +48,9 @@ do
 done
 EOF
 
-cat >deploy-test.service <<EOF
+cat >blakey-test.service <<EOF
 [Unit]
-Description=Test service for deployer
+Description=Test service for blakey
 Wants=network-online.target
 After=network-online.target
 
@@ -58,8 +58,8 @@ After=network-online.target
 Type=simple
 User=vagrant
 Group=vagrant
-WorkingDirectory=/var/local/deploy/test/current/work/
-ExecStart=/bin/bash deploy-test.sh
+WorkingDirectory=/var/local/blakey/test/current/work/
+ExecStart=/bin/bash blakey-test.sh
 StandardOutput=syslog
 StandardError=syslog
 
@@ -69,13 +69,13 @@ EOF
 
 git add .
 git commit -m "init"
-git remote add deploy ssh://vagrant@localhost:2222//var/local/deploy/test/repo.git
+git remote add deploy ssh://vagrant@localhost:2222//var/local/blakey/test/repo.git
 ssh-agent bash -c "ssh-add $key; git push deploy master"
 
 popd
 
-vagrant ssh -c "sudo systemctl enable /var/local/deploy/test/current/work/deploy-test.service"
-vagrant ssh -c "sudo systemctl start deploy-test.service"
+vagrant ssh -c "sudo systemctl enable /var/local/blakey/test/current/work/blakey-test.service"
+vagrant ssh -c "sudo systemctl start blakey-test.service"
 sleep 1
 srv_txt=$(vagrant ssh -c 'cat /tmp/srv.txt')
 [[ "$srv_txt" = "1" ]] || (echo "expected to read 1, got $srv_txt.";exit 1)
@@ -83,7 +83,7 @@ srv_txt=$(vagrant ssh -c 'cat /tmp/srv.txt')
 # now change the 1 to 2 in the service, and push the change.
 pushd $tmp
 
-sed -i 's/echo -n 1/echo -n 2/' deploy-test.sh
+sed -i 's/echo -n 1/echo -n 2/' blakey-test.sh
 git add .
 git commit -m 1
 ssh-agent bash -c "ssh-add $key; git push deploy master"
@@ -97,7 +97,7 @@ srv_txt=$(vagrant ssh -c 'cat /tmp/srv.txt')
 # now change the 2 to 3 in the service, and push the change.
 pushd $tmp
 
-sed -i 's/echo -n 2/echo -n 3/' deploy-test.sh
+sed -i 's/echo -n 2/echo -n 3/' blakey-test.sh
 git add .
 git commit -m 2
 ssh-agent bash -c "ssh-add $key; git push deploy master"

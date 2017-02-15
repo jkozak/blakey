@@ -79,7 +79,7 @@ const initVersionWorkDir = exports.initVersionWorkDir = (dir,opts,cb)=>{
     } else if (fs.existsSync(path.join(dir,'package.json'))) {
         cmd = "npm install";
     } else if (fs.existsSync(path.join(dir,'Makefile'))) {
-        cmd = "make install";
+        cmd = "make build";
     } else if (fs.existsSync(path.join(dir,'setup.py'))) {
         cmd = "python setup.py build";
     }

@@ -1,1 +1,84 @@
-* Deployer - simple git/systemd based deployment
+* blakey - simple git/systemd based deployment
+
+** Caveat
+
+This is a new package (2017-02-15) which directly manipulates
+=systemd=, caution appropriate.
+
+** Introduction
+
+=blakey= is installed on machines that are deployment targets.  It
+manages bare git repositories; if stuff is pushed to one of these
+repositories, it is automatically checked out and the services that
+reference it are restarted.  Only =systemd= is supported so far.
+
+** setup
+
+Until it gets published on the npm repository, install from source
+(as root) on each machine you intend to deploy to:
+#+BEGIN_SRC shell
+npm install -g
+#+END_SRC
+
+You should probably create a directory to keep deployments in:
+#+BEGIN_SRC shell
+mkdir /var/local/blakey
+#+END_SRC
+
+** tests
+
+=npm test= runs the unit tests.  There's also some vagrant-based
+system tests: =npm run test:sys=.
+
+** use
+
+Let's say we want to deploy a project called =butler=.
+
+Create a directory to hold the deployment:
+#+BEGIN_SRC shell
+mkdir /var/local/blakey/butler
+#+END_SRC
+
+Initialise it:
+#+BEGIN_SRC shell
+cd /var/local/blakey/butler
+blakey init
+#+END_SRC
+
+This will create subdirectories so:
+#+BEGIN_SRC example
+/var/local/blakey/butler/
+  repo.git/
+  versions/
+#+END_SRC
+=repo.git= is the bare repo; each push creates a new directory under
+=versions=, and after the first push, there will be a symlink
+=current= which points to the most recent version.  The code will be
+checked-out into a subdirectory called =work=.
+
+The repo created is =--shared=group= and the user on the deployment
+machine that is receiving the push should be in that group.  Also that
+user should be able to do =sudo systemctl=.
+
+Setup code will be run automatically, based on discovery of files:
+|--------------+-----------------------|
+| filename     | command               |
+|--------------+-----------------------|
+| package.json | npm install           |
+| Makefile     | make install          |
+| setup.py     | python setup.py build |
+|--------------+-----------------------|
+Note that these build procedures should leave the code ready to run,
+but shouldn't write outside of the deployment directory,
+=/var/local/blakey/butler/current= in this example.
+
+When some code has been pushed and the automatic build performed (will
+happen synchronously with the =git push=), you can enable and start
+whatever =systemd= services there are:
+#+BEGIN_SRC shell
+systemctl enable /var/local/blakey/butler/current/work/butler.service
+systemctl start butler.service
+#+END_SRC
+Don't make a symlink from =/etc/systemd/system=, this doesn't work.
+That's by design, and the error message is "no such file or
+directory".
