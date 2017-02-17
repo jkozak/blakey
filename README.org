@@ -14,10 +14,10 @@ reference it are restarted.  Only =systemd= is supported so far.
 
 ** Setup
 
-Until it gets published on the npm repository, install from source
-(as root) on each machine you intend to deploy to:
+Either clone this repo and install, or, to install from =npm= run (as
+root) on each machine you intend to deploy to:
 #+BEGIN_SRC shell
-npm install -g
+npm install -g blakey
 #+END_SRC
 
 You should probably create a directory to keep deployments in:
