@@ -247,7 +247,7 @@ const main = exports.main = (argv)=>{
     if (subcommands[args.subcommandName].exec===undefined)
         throw new VError("NYI: subcommand `%s`",args.subcommandName);
     subcommands[args.subcommandName].exec(args);
-}
+};
 
 if (require.main===module) {
     try {

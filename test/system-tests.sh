@@ -12,6 +12,8 @@ trap cleanup EXIT
 
 key=$(pwd)/.vagrant/machines/default/virtualbox/private_key
 
+vagrant ssh -c "sudo apt-get install -y pandoc"
+
 (tar caf - --no-recursion ../* ../test/*) | vagrant ssh -c "tar xaf -"
 cat ~/.npmrc | vagrant ssh -c "cat > .npmrc"
 vagrant ssh -c "sed -i '/prefix=/d' .npmrc"
