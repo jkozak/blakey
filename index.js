@@ -73,7 +73,10 @@ const getAffectedServices = exports.getAffectedServices = (base,commit,opts)=>{
 };
 
 const initVersionWorkDir = exports.initVersionWorkDir = (dir,opts,cb)=>{
-    let cmd = null;
+    let   cmd = null;
+    const gid = fs.statSync(path.join(dir,'..')).gid;
+    cp.execSync(`chgrp -R ${gid} ${dir}`);
+    cp.execSync(`chmod -R g+ws ${dir}`);
     if (opts.init) {
         cmd = opts.init;
     } else if (fs.existsSync(path.join(dir,'package.json'))) {

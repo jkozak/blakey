@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -e -v
 
 tmp=$(mktemp -d)
 vagrant up
