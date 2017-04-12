@@ -1,6 +1,6 @@
 {
   "name": "blakey",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "simple git/systemd based deployment",
   "main": "index.js",
   "scripts": {
@@ -32,11 +32,11 @@
   "bin": {
     "blakey": "./index.js"
   },
-  "bugs":{
-      "url": "https://github.com/jkozak/blakey/issues"
+  "bugs": {
+    "url": "https://github.com/jkozak/blakey/issues"
   },
   "repository": {
     "type": "git",
-    "url":  "https://github.com/jkozak/blakey.git"
+    "url": "https://github.com/jkozak/blakey.git"
   }
 }
