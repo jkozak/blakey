@@ -76,7 +76,8 @@ const initVersionWorkDir = exports.initVersionWorkDir = (dir,opts,cb)=>{
     let   cmd = null;
     const gid = fs.statSync(path.join(dir,'..')).gid;
     cp.execSync(`chgrp -R ${gid} ${dir}`);
-    cp.execSync(`chmod -R g+ws ${dir}`);
+    cp.execSync(`chmod -R g+w ${dir}`);
+    cp.execSync(`find ${dir} -type d -exec chmod g+s {} \\;`);
     if (opts.init) {
         cmd = opts.init;
     } else if (fs.existsSync(path.join(dir,'package.json'))) {
